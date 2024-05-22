@@ -15,18 +15,33 @@ import java.util.Scanner;
 
 public class App {
     public static void main(String[] args) {
-        try {
+        try(Scanner scanner = new Scanner(System.in)) {
             File inputFile = new File("input.xml");
+            if (!inputFile.exists()) {
+                System.out.println("The file input.xml does not exist.");
+                return;
+            }
+
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(inputFile);
             doc.getDocumentElement().normalize();
 
-            Scanner scanner = new Scanner(System.in);
+            
             System.out.print("Enter the fields you want to display (comma separated): ");
             String[] fields = scanner.nextLine().split(",");
 
+            if (fields.length == 0) {
+                System.out.println("No fields entered.");
+                return;
+            }
+
             NodeList nList = doc.getElementsByTagName("yourElementTag");
+
+            if (nList.getLength() == 0) {
+                System.out.println("No elements found with the tag 'yourElementTag'.");
+                return;
+            }
 
             for (int temp = 0; temp < nList.getLength(); temp++) {
                 Node nNode = nList.item(temp);
