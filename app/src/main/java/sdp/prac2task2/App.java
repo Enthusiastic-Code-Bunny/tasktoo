@@ -10,6 +10,7 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
 import java.io.File;
+import java.util.Scanner;
 
 public class App {
     public static void main(String[] args) {
@@ -20,17 +21,25 @@ public class App {
             Document doc = dBuilder.parse(inputFile);
             doc.getDocumentElement().normalize();
 
-            System.out.println("Root element: " + doc.getDocumentElement().getNodeName());
+            Scanner scanner = new Scanner(System.in);
+            System.out.print("Enter the fields you want to display (comma separated): ");
+            String[] fields = scanner.nextLine().split(",");
+
             NodeList nList = doc.getElementsByTagName("yourElementTag");
 
             for (int temp = 0; temp < nList.getLength(); temp++) {
                 Node nNode = nList.item(temp);
-                System.out.println("\nCurrent Element: " + nNode.getNodeName());
 
                 if (nNode.getNodeType() == Node.ELEMENT_NODE) {
                     Element eElement = (Element) nNode;
-                    System.out.println("Field1: " + eElement.getElementsByTagName("field1").item(0).getTextContent());
-                    System.out.println("Field2: " + eElement.getElementsByTagName("field2").item(0).getTextContent());
+                    for (String field : fields) {
+                        field = field.trim();
+                        if (eElement.getElementsByTagName(field).getLength() > 0) {
+                            System.out.println(field + ": " + eElement.getElementsByTagName(field).item(0).getTextContent());
+                        } else {
+                            System.out.println(field + ": Not found");
+                        }
+                    }
                 }
             }
         } catch (Exception e) {
