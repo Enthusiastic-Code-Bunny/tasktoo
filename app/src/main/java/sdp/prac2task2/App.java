@@ -29,18 +29,20 @@ public class App {
 
             for (int temp = 0; temp < nList.getLength(); temp++) {
                 Node nNode = nList.item(temp);
+                JSONObject json = new JSONObject();
 
                 if (nNode.getNodeType() == Node.ELEMENT_NODE) {
                     Element eElement = (Element) nNode;
                     for (String field : fields) {
                         field = field.trim();
                         if (eElement.getElementsByTagName(field).getLength() > 0) {
-                            System.out.println(field + ": " + eElement.getElementsByTagName(field).item(0).getTextContent());
+                            json.put(field, eElement.getElementsByTagName(field).item(0).getTextContent());
                         } else {
-                            System.out.println(field + ": Not found");
+                            json.put(field, "Not found");
                         }
                     }
                 }
+                System.out.println(json.toString(4));
             }
         } catch (Exception e) {
             e.printStackTrace();
