@@ -3,62 +3,49 @@
  */
 package sdp.prac2task2;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.DocumentBuilder;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Node;
-import org.w3c.dom.Element;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import org.json.JSONObject;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class App {
     public static void main(String[] args) {
-        try(Scanner scanner = new Scanner(System.in)) {
+        try {
             File inputFile = new File("input.xml");
             if (!inputFile.exists()) {
                 System.out.println("The file input.xml does not exist.");
                 return;
             }
 
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(inputFile);
-            doc.getDocumentElement().normalize();
-
-            
-            System.out.print("Enter the fields you want to display (comma separated): ");
-            String[] fields = scanner.nextLine().split(",");
-
-            if (fields.length == 0) {
-                System.out.println("No fields entered.");
-                return;
-            }
-
-            NodeList nList = doc.getElementsByTagName("yourElementTag");
-
-            if (nList.getLength() == 0) {
-                System.out.println("No elements found with the tag 'yourElementTag'.");
-                return;
-            }
-
-            for (int temp = 0; temp < nList.getLength(); temp++) {
-                Node nNode = nList.item(temp);
-                JSONObject json = new JSONObject();
-
-                if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-                    Element eElement = (Element) nNode;
-                    for (String field : fields) {
-                        field = field.trim();
-                        if (eElement.getElementsByTagName(field).getLength() > 0) {
-                            json.put(field, eElement.getElementsByTagName(field).item(0).getTextContent());
-                        } else {
-                            json.put(field, "Not found");
-                        }
-                    }
+            List<String> fields = new ArrayList<>();
+            try (Scanner scanner = new Scanner(System.in)) {
+                System.out.print("Enter the fields you want to display (comma separated): ");
+                String input = scanner.nextLine();
+                if (input.isEmpty()) {
+                    System.out.println("No fields entered.");
+                    return;
                 }
-                System.out.println(json.toString(4));
+                String[] fieldArray = input.split(",");
+                for (String field : fieldArray) {
+                    fields.add(field.trim());
+                }
+            } catch (Exception e) {
+                System.out.println("Error reading input: " + e.getMessage());
+                return;
+            }
+
+            SAXParserFactory factory = SAXParserFactory.newInstance();
+            SAXParser saxParser = factory.newSAXParser();
+
+            UserHandler userHandler = new UserHandler(fields);
+            saxParser.parse(inputFile, userHandler);
+
+            List<JSONObject> jsonObjects = userHandler.getJsonObjects();
+            for (JSONObject jsonObject : jsonObjects) {
+                System.out.println(jsonObject.toString(4));
             }
         } catch (Exception e) {
             e.printStackTrace();
